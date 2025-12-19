@@ -36,9 +36,10 @@ public class Party {
     })
     private Point targetPoint;
 
-    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL)
-    private List<PointSample> samples;
-
+//    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL)
+//    private List<PointSample> samples;
+    private Double movementTime;   // To store 'elapsed' from ESP32
+    private Double indexDifficulty; // To store log2(D + 1)
     public Party() {}
 
     //getters and setters
@@ -48,6 +49,19 @@ public class Party {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setIndexDifficulty(Double indexDifficulty) {
+        this.indexDifficulty = indexDifficulty;
+    }
+    public void setMovementTime(Double movementTime) {
+        this.movementTime = movementTime;
+    }
+    public Double getMovementTime() {
+        return movementTime;
+    }
+    public Double getIndexDifficulty() {
+        return indexDifficulty;
     }
 
     public Double getScore() {
@@ -88,11 +102,11 @@ public class Party {
     public void setTargetPoint(Point targetPoint) {
         this.targetPoint = targetPoint;
     }
-    public List<PointSample> getSamples() {
-        return samples;
-    }
-    public void setSamples(List<PointSample> samples) {
-        this.samples = samples;
-    }
+//    public List<PointSample> getSamples() {
+//        return samples;
+//    }
+//    public void setSamples(List<PointSample> samples) {
+//        this.samples = samples;
+//    }
 
 }

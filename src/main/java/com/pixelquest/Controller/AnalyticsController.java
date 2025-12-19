@@ -15,16 +15,18 @@ public class AnalyticsController {
   @Autowired
   private PartyService partyService;
 
+  // Fetch data for the Scatter Plot (ID vs MT)
   @GetMapping("/fitts-data/{playerId}")
   public List<Map<String, Double>> getFittsRawData(@PathVariable Long playerId) {
     return partyService.getPartiesByPlayer(playerId).stream()
-            .filter(p -> p.getScore() != null) // Only finished games
+            .filter(p -> p.getScore() != null && p.getMovementTime() != null) // Only completed games
             .map(p -> Map.of(
-                    "id", partyService.calculateID(p),
-                    "mt", partyService.calculateMT(p)
+                    "id", p.getIndexDifficulty(), // Retrieved from Party field
+                    "mt", p.getMovementTime()      // Retrieved from Party field
             )).toList();
   }
 
+  // Fetch the current Player's Fitts Law coefficients (a and b)
   @GetMapping("/constants/{playerId}")
   public Map<String, Double> getPlayerConstants(@PathVariable Long playerId) {
     return Map.of(

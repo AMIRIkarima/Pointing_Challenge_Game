@@ -11,40 +11,38 @@ import com.pixelquest.Entity.Difficulty;
 
 import com.pixelquest.Service.PartyService;
 
-import com.pixelquest.DTO.PointSampleDTO;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/parties")
+@CrossOrigin(origins = "*")
 public class PartyController {
 
     @Autowired
     private PartyService partyService;
 
-    // STEP 1: Mobile App calls this to start a game
+    // STEP 1: Mobile App calls this to start a game with a specific difficulty
     @PostMapping("/start")
     public Party startParty(@RequestParam Long playerId, @RequestParam Difficulty difficulty) {
-        // Logic inside service should generate targetX and targetY based on difficulty
-        return partyService.startPartyWithRandomTarget(playerId,difficulty);
+        return partyService.startParty(playerId, difficulty);
     }
 
-    // STEP 2: ESP32 calls this to send the trajectory points
-    @PostMapping("/{partyId}/samples")
-    public void addSamples(@PathVariable Long partyId, @RequestBody List<PointSampleDTO> samples) {
-        partyService.addSamples(partyId, samples);
-    }
-
-    // STEP 3: Triggered after samples are sent to calculate score
-    @PostMapping("/{partyId}/finish")
-    public Party finishParty(@PathVariable Long partyId) {
-        return partyService.finishParty(partyId);
-    }
-
-    // STEP 4: ESP32 calls this to know what to draw on OLED
+    // STEP 2: ESP32 calls this to fetch the mission coordinates (Target X, Y)
     @GetMapping("/active/{playerId}")
     public Party getActiveParty(@PathVariable Long playerId) {
-        return partyService.findLatestActiveParty(playerId);
+        return partyService.getActivePartyForPlayer(playerId);
+    }
+
+    // STEP 3: ESP32 calls this once to send final Time and Distance
+    @PostMapping("/{partyId}/direct-finish")
+    public Party finishDirect(@PathVariable Long partyId, @RequestBody Map<String, Double> data) {
+        return partyService.finishPartyWithDirectData(
+                partyId,
+                data.get("time_sec"),
+                data.get("distance")
+        );
     }
 }
