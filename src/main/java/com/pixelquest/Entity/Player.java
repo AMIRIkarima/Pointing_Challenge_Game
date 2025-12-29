@@ -16,7 +16,7 @@ public class Player {
     private PlayerLevel playerlevel;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
-    private List<Party> parties;
+    private List<Game> games;
 
 
 
@@ -47,11 +47,11 @@ public class Player {
 
 
 
-    public List<Party> getParties() {
-        return parties;
+    public List<Game> getGames() {
+        return games;
     }
-    public void setParties(List<Party> parties) {
-        this.parties = parties;
+    public void setGames(List<Game> games) {
+        this.games = games;
     }
 
     public PlayerLevel getLevel() {

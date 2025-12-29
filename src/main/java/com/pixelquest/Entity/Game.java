@@ -1,11 +1,12 @@
 package com.pixelquest.Entity;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-public class Party {
+public class Game {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,11 +37,11 @@ public class Party {
     })
     private Point targetPoint;
 
-//    @OneToMany(mappedBy = "party", cascade = CascadeType.ALL)
+//    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
 //    private List<PointSample> samples;
     private Double movementTime;   // To store 'elapsed' from ESP32
     private Double indexDifficulty; // To store log2(D + 1)
-    public Party() {}
+    public Game() {}
 
     //getters and setters
     public Long getId() {
@@ -101,6 +102,11 @@ public class Party {
     }
     public void setTargetPoint(Point targetPoint) {
         this.targetPoint = targetPoint;
+    }
+
+    @JsonProperty("playerId")
+    public Long getPlayerId() {
+        return (player != null) ? player.getId() : null;
     }
 //    public List<PointSample> getSamples() {
 //        return samples;
