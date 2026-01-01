@@ -6,7 +6,7 @@ import api from './services/api';
 
 const selectedPlayer = ref(null);
 const fittsData = ref([]);
-const stats = ref({ interceptA: 0, slopeB: 0 });
+const stats = ref({ fittsA: 0, fittsB: 0 });
 const isLoading = ref(false);
 
 // Fetch data when a player is selected
@@ -20,7 +20,14 @@ const loadPlayerData = async () => {
       api.getConstants(selectedPlayer.value.id)
     ]);
     fittsData.value = points;
-    stats.value = constants;
+    console.log('Loaded points:', points);
+    console.log('Constants loaded:', constants);
+
+    
+    stats.value = {
+      fittsA: (constants && (constants.fittsA ?? constants.interceptA)) ?? 0,
+      fittsB: (constants && (constants.fittsB ?? constants.slopeB)) ?? 0
+    };
   } catch (e) {
     console.error(e);
   } finally {
@@ -33,7 +40,7 @@ const handleSelect = (player) => {
   loadPlayerData();
 };
 
-// "Extra Idea": Auto-refresh every 5 seconds to see live game updates
+// Auto-refresh every 5 seconds to see live game updates
 setInterval(() => {
   if (selectedPlayer.value) loadPlayerData();
 }, 5000);
@@ -58,11 +65,11 @@ setInterval(() => {
         <div class="stats-grid">
           <div class="card">
             <h3>Reaction Time (a)</h3>
-            <div class="value">{{ stats.interceptA.toFixed(3) }}s</div>
+            <div class="value">{{ (stats.fittsA || 0).toFixed(3) }}s</div>
           </div>
           <div class="card">
             <h3>Processing Speed (b)</h3>
-            <div class="value">{{ stats.slopeB.toFixed(3) }}s/bit</div>
+            <div class="value">{{ (stats.fittsB || 0).toFixed(3) }}s/bit</div>
           </div>
           <div class="card info">
             <p><strong>Interpretation:</strong> Lower 'b' means the player processes difficult targets faster.</p>
@@ -72,8 +79,8 @@ setInterval(() => {
         <div class="chart-section" v-if="fittsData.length > 0">
            <FittsChart 
              :rawPoints="fittsData" 
-             :slope="stats.slopeB" 
-             :intercept="stats.interceptA" 
+             :slope="stats.fittsB" 
+             :intercept="stats.fittsA" 
            />
         </div>
         <div v-else class="no-data">

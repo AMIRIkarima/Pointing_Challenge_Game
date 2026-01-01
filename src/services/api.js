@@ -1,3 +1,4 @@
+
 const API_URL = "http://localhost:8080"; 
 
 export default {
@@ -20,13 +21,13 @@ export default {
   },
 
   async getFittsData(playerId) {
-    const res = await fetch(`${API_URL}/analytics/fitts-data/${playerId}`);
+    const res = await fetch(`${API_URL}/api/analytics/fitts-data/${playerId}`);
     if (!res.ok) throw new Error('Failed to fetch Fitts data');
     return res.json();
   },
 
   async getConstants(playerId) {
-    const res = await fetch(`${API_URL}/analytics/constants/${playerId}`);
+    const res = await fetch(`${API_URL}/api/analytics/constants/${playerId}`);
     if (!res.ok) throw new Error('Failed to fetch constants');
     return res.json();
   }
