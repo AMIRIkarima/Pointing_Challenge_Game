@@ -19,7 +19,7 @@ public class GameService {
     @Autowired
     private PlayerRepository playerRepository;
 
-    // Defaults match the ESP32 OLED in your attachment (128x64)
+    // Defaults match the ESP32 OLED (128x64)
     @Value("${pixelquest.screen.width:128}")
     private int screenWidth;
 
@@ -77,20 +77,19 @@ public class GameService {
         Game game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new RuntimeException("Game not found"));
 
-        // 1. Store direct metrics from hardware
+        //  Store direct metrics from hardware
         game.setMovementTime(timeSec);
 
-        // 2. Calculate Index of Difficulty (ID) -> ID = log2(D + 1)
+        //  Calculate Index of Difficulty (ID) -> ID = log2(D + 1)
         double id = Math.log(distance + 1) / Math.log(2);
         game.setIndexDifficulty(id);
 
-        // 3. Calculate Expected Time using Player's current parameters
-        // We use the existing values in the Player entity
+        //  Calculate Expected Time using Player's current parameters
         double a = (game.getPlayer().getFittsA() != null) ? game.getPlayer().getFittsA() : 0.5; // Default 0.5
         double b = (game.getPlayer().getFittsB() != null) ? game.getPlayer().getFittsB() : 0.2; // Default 0.2
         double expectedTime = a + b * id;
 
-        // 4. XP computation
+        //  XP computation
         double xp = game.getDifficulty().getMultiplier() * 50 * (expectedTime / timeSec);
         xp = Math.max(0, Math.min(500, xp));
 
@@ -99,10 +98,10 @@ public class GameService {
         // Save the game first so it is included in the regression math
         gameRepository.save(game);
 
-        // 5. Update player's global level progress
+        //  Update player's global level progress
         updatePlayerLevel(game.getPlayer().getId(), (int) xp);
 
-        // 6. Recalculate and update Player's Fitts A and B (The Regression)
+        //  Recalculate and update Player's Fitts A and B (The Regression)
         updatePlayerFittsParameters(game.getPlayer());
 
         return game;
@@ -118,7 +117,7 @@ public class GameService {
                 .filter(g -> g.getMovementTime() != null && g.getIndexDifficulty() != null)
                 .toList();
 
-        // We need at least 2 points to calculate a trend (slope and intercept)
+        // We need at least 2 points to calculate the slope and intercept
         if (validGames.size() >= 2) {
             double n = validGames.size();
             double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
@@ -165,7 +164,7 @@ public class GameService {
     }
 
 
-    // --- Analytics Helper Methods for Controllers ---
+    // Analytics Helper Methods for Controllers
 
     public List<Game> getGamesByPlayer(Long playerId) {
         return gameRepository.findByPlayer_Id(playerId);

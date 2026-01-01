@@ -38,10 +38,9 @@ public class Game {
     })
     private Point targetPoint;
 
-//    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-//    private List<PointSample> samples;
-    private Double movementTime;   // To store 'elapsed' from ESP32
-    private Double indexDifficulty; // To store log2(D + 1)
+
+    private Double movementTime;
+    private Double indexDifficulty;
     public Game() {}
 
     //getters and setters

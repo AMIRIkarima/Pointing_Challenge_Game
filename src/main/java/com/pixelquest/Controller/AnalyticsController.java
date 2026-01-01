@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/analytics")
+@RequestMapping("/analytics")
 @CrossOrigin(origins = "*")
 public class AnalyticsController {
 
@@ -19,10 +19,10 @@ public class AnalyticsController {
   @GetMapping("/fitts-data/{playerId}")
   public List<Map<String, Double>> getFittsRawData(@PathVariable Long playerId) {
         return gameService.getGamesByPlayer(playerId).stream()
-          .filter(p -> p.getScore() != null && p.getMovementTime() != null) // Only completed games
+          .filter(p -> p.getScore() != null && p.getMovementTime() != null)
           .map(p -> Map.of(
-            "id", p.getIndexDifficulty(), // Retrieved from Game field
-            "mt", p.getMovementTime()      // Retrieved from Game field
+            "id", p.getIndexDifficulty(),
+            "mt", p.getMovementTime()
           )).toList();
   }
 

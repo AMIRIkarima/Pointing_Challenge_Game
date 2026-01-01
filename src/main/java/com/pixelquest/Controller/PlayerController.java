@@ -32,7 +32,7 @@ public class PlayerController {
         return playerService.getPlayer(id);
     }
 
-    // New: Mobile app can check current level and XP
+
     @GetMapping("/{id}/level")
     public PlayerLevel getLevel(@PathVariable Long id) {
         return playerService.getPlayer(id).getLevel();

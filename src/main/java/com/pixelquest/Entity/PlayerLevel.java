@@ -23,13 +23,12 @@ public class PlayerLevel {
     public int getTotalScore() { return totalScore; }
     public String getLevel() { return level; }
 
-    // Business Logic: The only way to change the score
+
     public void addScore(int score) {
         this.totalScore += score;
         this.level = computeRank(this.totalScore);
     }
 
-    // Logic for Hibernate to use during reconstruction
     public void setTotalScore(int totalScore) {
         this.totalScore = totalScore;
         this.level = computeRank(totalScore);
@@ -42,9 +41,10 @@ public class PlayerLevel {
     }
 
     private String computeRank(int score) {
-        if (score < 100) return "Beginner";
-        if (score < 200) return "Intermediate";
-        if (score < 400) return "Advanced";
+        if (score < 500) return "Beginner";
+        if (score < 2000) return "Intermediate";
+        if (score < 5000) return "Advanced";
+        if (score < 10000) return "Expert";
         return "Pro";
     }
 }
