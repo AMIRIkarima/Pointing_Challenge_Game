@@ -92,7 +92,8 @@ public class GameService {
         double xp = game.getDifficulty().getMultiplier() * 50 * (expectedTime / timeSec);
         xp = Math.max(0, Math.min(500, xp));
 
-        game.setScore(xp);
+
+        game.setScore((int) xp);
 
         // Save the game first so it is included in the regression math
         gameRepository.save(game);
@@ -140,7 +141,7 @@ public class GameService {
 
                 player.setFittsA(a);
                 player.setFittsB(b);
-                playerRepository.save(player); // Persistent update to the DB
+                playerRepository.save(player);
             }
         }
     }

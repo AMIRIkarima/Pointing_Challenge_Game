@@ -12,7 +12,7 @@ public class Game {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Double score;
+    private Integer score;
 
     @Enumerated(EnumType.STRING)
     private Difficulty difficulty;
@@ -65,11 +65,11 @@ public class Game {
         return indexDifficulty;
     }
 
-    public Double getScore() {
+    public Integer getScore() {
         return score;
     }
 
-    public void setScore(Double score) {
+    public void setScore(Integer score) {
         this.score = score;
     }
 

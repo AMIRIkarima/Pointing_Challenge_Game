@@ -19,7 +19,7 @@ public class PlayerLevel {
         this.level = computeRank(totalScore);
     }
 
-    // Standard Getters
+
     public int getTotalScore() { return totalScore; }
     public String getLevel() { return level; }
 
@@ -34,9 +34,8 @@ public class PlayerLevel {
         this.level = computeRank(totalScore);
     }
 
-    // Private because we don't want anyone to manually set the rank
-    // without changing the score.
-    private void setLevel(String level) {
+
+    public void setLevel(String level) {
         this.level = level;
     }
 
