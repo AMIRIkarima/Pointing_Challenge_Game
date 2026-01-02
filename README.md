@@ -1,4 +1,4 @@
-Pointing Challenge Game
+**Pointing Challenge Game**
 This project consists of four main components that work together. To run the game, please follow the specific instructions in each directory.
 
  
@@ -13,4 +13,5 @@ https://github.com/AMIRIkarima/Pointing_Challenge_Game/blob/main/embedded/README
 
 Mobile App The handheld interface to start games.
 https://github.com/AMIRIkarima/Pointing_Challenge_Game/tree/main/mobile
+
 
