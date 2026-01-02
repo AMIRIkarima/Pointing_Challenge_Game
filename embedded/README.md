@@ -66,6 +66,42 @@ The ESP32 does not control the game logic; it interacts with the backend and the
 * **Backend Server**: Node.js, Python, or any server that exposes the required endpoints
 * **Network**: ESP32 and PC must be on the same Wi-Fi network
 
+### ESP32 Game Setup with Ampy
+
+This guide explains how to upload the **driver** and the **main program (`main.py`)** to your ESP32 board using **ampy**.
+
+---
+
+## 1️⃣ Prerequisites
+
+Before starting, make sure you have:
+
+- ESP32 board connected via USB
+- MicroPython firmware installed on the ESP32
+- Python installed on your computer
+
+---
+
+## 2️⃣ Install Ampy
+
+Install ampy using pip with the command : "pip install adafruit-ampy"
+
+## 🔎 Find your ESP32 COM Port (Windows)
+
+To use `ampy`, you need to know which **COM port** your ESP32 is connected to.
+
+1. Open **Device Manager**  
+   - Press `Win + X` → **Device Manager**
+
+2. Expand the section **Ports (COM & LPT)**
+
+3. Look for a device like: USB Serial Device (COM3)
+   
+4. The number in parentheses (e.g., `COM3`) is your **ESP32 COM port**.
+
+> You will use this COM port in all `ampy` commands.
+
+## Upload Driver and main.py
 ### SH1107 Driver
 
 This project uses the **sh1107 driver** for the OLED.
@@ -80,10 +116,23 @@ If there is **no error**, the driver is installed.
 
 * If not installed:
 
-  1. Download `sh1107.py` from the GitHub repo.
-  2. Use **Thonny** or **ampy** to upload the file to the ESP32.
+Replace COM_PORT with your ESP32 COM port (e.g., COM3).
+Download the driver `sh1107.py` from the repository and go th its location on the command line.
+Upload the driver first (example: sh1107.py) with the command : "ampy --port COM_PORT put sh1107.py"
+ 
+### Upload the main program:
 
----
+Download the 'main.py' file and go to its location on the command line
+Put the main.py file in the esp32 with the command : "ampy --port COM_PORT put main.py"
+
+### Run the main program (optional, ESP32 usually runs main.py automatically):
+
+"ampy --port COM_PORT run main.py"
+
+### Check uploaded files:
+
+"ampy --port COM_PORT ls"
+
 
 ## Configuration
 
