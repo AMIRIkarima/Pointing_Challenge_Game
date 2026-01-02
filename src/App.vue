@@ -1,90 +1,168 @@
 <script setup>
-import { ref, watch } from 'vue';
-import PlayerList from './components/PlayerList.vue';
-import FittsChart from './components/FittsChart.vue';
-import api from './services/api';
+import { ref, onMounted, onUnmounted, watch } from "vue";
+import PlayerList from "./components/PlayerList.vue";
+import GameHistory from "./components/GameHistory.vue";
+import FittsChart from "./components/FittsChart.vue";
+import StatCard from "./components/StatCard.vue";
+import api from "./services/api";
+
 
 const selectedPlayer = ref(null);
+const playerGames = ref([]);
 const fittsData = ref([]);
 const stats = ref({ fittsA: 0, fittsB: 0 });
 const isLoading = ref(false);
+let refreshInterval = null;
 
-// Fetch data when a player is selected
-const loadPlayerData = async () => {
-  if (!selectedPlayer.value) return;
-  
+
+const fetchAllPlayerData = async (playerId) => {
+  if (!playerId) return;
+
   isLoading.value = true;
   try {
-    const [points, constants] = await Promise.all([
-      api.getFittsData(selectedPlayer.value.id),
-      api.getConstants(selectedPlayer.value.id)
+    
+    const [history, points, constants] = await Promise.all([
+      api.getPlayerHistory(playerId),
+      api.getFittsData(playerId),
+      api.getConstants(playerId),
     ]);
-    fittsData.value = points;
-    console.log('Loaded points:', points);
-    console.log('Constants loaded:', constants);
 
     
+    const normalizeGame = (g) => {
+      if (!g) return g;
+      const get = (keys) => {
+        for (const k of keys) {
+          if (g[k] !== undefined && g[k] !== null && g[k] !== "") return g[k];
+        }
+        return undefined;
+      };
+
+      const movementTime = get(["movementTime", "movement_time", "time", "mt", "movementTimeMs", "ms"]);
+      const distance = get(["distance", "dist", "d", "distancePx", "distance_px"]);
+      const score = get(["score", "xp", "points"]);
+      const difficulty = get(["difficulty", "diff", "level"]);
+      const creationDate = get(["creationDate", "createdAt", "timestamp", "timeStamp"]);
+      const id = get(["id", "_id", "gameId"]);
+
+      
+      const startX = get(["startX", "sx", "x1"]);
+      const startY = get(["startY", "sy", "y1"]);
+      const endX = get(["endX", "ex", "x2"]);
+      const endY = get(["endY", "ey", "y2"]);
+
+      return {
+        ...g,
+        id,
+        creationDate,
+        difficulty,
+        movementTime,
+        distance,
+        score,
+        startX,
+        startY,
+        endX,
+        endY,
+      };
+    };
+
+    playerGames.value = Array.isArray(history) ? history.map(normalizeGame) : history;
+    fittsData.value = points;
+
+   
+    console.debug('fetchAllPlayerData: raw history sample', history && history[0]);
+    console.debug('fetchAllPlayerData: normalized history sample', playerGames.value && playerGames.value[0]);
+    console.debug('fetchAllPlayerData: points sample', points && points[0]);
+    console.debug('fetchAllPlayerData: constants', constants);
+
+
     stats.value = {
-      fittsA: (constants && (constants.fittsA ?? constants.interceptA)) ?? 0,
-      fittsB: (constants && (constants.fittsB ?? constants.slopeB)) ?? 0
+      fittsA: constants?.fittsA ?? constants?.interceptA ?? 0,
+      fittsB: constants?.fittsB ?? constants?.slopeB ?? 0,
     };
   } catch (e) {
-    console.error(e);
+    console.error("Error synchronization failed:", e);
   } finally {
     isLoading.value = false;
   }
 };
 
-const handleSelect = (player) => {
+const handleSelectPlayer = (player) => {
   selectedPlayer.value = player;
-  loadPlayerData();
+  if (!player) {
+    playerGames.value = [];
+    fittsData.value = [];
+  }
 };
 
-// Auto-refresh every 5 seconds to see live game updates
-setInterval(() => {
-  if (selectedPlayer.value) loadPlayerData();
-}, 5000);
+
+watch(selectedPlayer, (newPlayer) => {
+  if (newPlayer) fetchAllPlayerData(newPlayer.id);
+});
+
+
+onMounted(() => {
+  
+  refreshInterval = setInterval(() => {
+    if (selectedPlayer.value && !isLoading.value) {
+      fetchAllPlayerData(selectedPlayer.value.id);
+    }
+  }, 5000);
+});
+
+onUnmounted(() => {
+  
+  if (refreshInterval) clearInterval(refreshInterval);
+});
 </script>
 
 <template>
   <div class="app-container">
-    <PlayerList @select-player="handleSelect" />
+    <PlayerList :activePlayerId="selectedPlayer?.id" @select-player="handleSelectPlayer" />
 
     <main class="dashboard">
       <div v-if="!selectedPlayer" class="empty-state">
-        <h2>Welcome to PixelQuest Analytics</h2>
-        <p>Select a player to view Fitts's Law performance.</p>
+        <div class="welcome-card">
+          <h2>Welcome to PixelQuest Analytics</h2>
+          <p>
+            Select a player from the sidebar to view Fitts's Law performance and
+            game history.
+          </p>
+        </div>
       </div>
 
       <div v-else class="content">
-        <header>
+        <header class="dashboard-header">
           <h1>{{ selectedPlayer.username }}'s Dashboard</h1>
-          <button @click="loadPlayerData" class="refresh-btn">Refresh Data</button>
+          <button @click="fetchAllPlayerData(selectedPlayer.id)" class="refresh-btn" :disabled="isLoading">
+            {{ isLoading ? "Refreshing..." : "Refresh Data" }}
+          </button>
         </header>
 
-        <div class="stats-grid">
-          <div class="card">
-            <h3>Reaction Time (a)</h3>
-            <div class="value">{{ (stats.fittsA || 0).toFixed(3) }}s</div>
-          </div>
-          <div class="card">
-            <h3>Processing Speed (b)</h3>
-            <div class="value">{{ (stats.fittsB || 0).toFixed(3) }}s/bit</div>
-          </div>
-          <div class="card info">
-            <p><strong>Interpretation:</strong> Lower 'b' means the player processes difficult targets faster.</p>
-          </div>
-        </div>
+        <div class="main-grid">
+          <div class="left-column">
+            <div class="stats-grid">
+              <StatCard title="Reaction Time (a)" :value="stats.fittsA" unit="s" description="Base movement delay" />
+              <StatCard title="Processing Speed (b)" :value="stats.fittsB" unit="s/bit"
+                description="Time per unit of difficulty" />
 
-        <div class="chart-section" v-if="fittsData.length > 0">
-           <FittsChart 
-             :rawPoints="fittsData" 
-             :slope="stats.fittsB" 
-             :intercept="stats.fittsA" 
-           />
-        </div>
-        <div v-else class="no-data">
-           <p>No games played yet. Start a party on the mobile app!</p>
+            </div>
+
+            <section class="chart-section">
+              <div v-if="fittsData.length > 0">
+                <FittsChart :rawPoints="fittsData" :slope="stats.fittsB" :intercept="stats.fittsA" />
+              </div>
+              <div v-else class="no-data-placeholder">
+                <p>
+                  No gameplay samples found. Start a game on the mobile app to see
+                  the regression line!
+                </p>
+              </div>
+            </section>
+          </div>
+
+          <aside class="right-column">
+            <GameHistory :games="playerGames" />
+          </aside>
         </div>
       </div>
     </main>
@@ -92,16 +170,91 @@ setInterval(() => {
 </template>
 
 <style>
-body { margin: 0; font-family: 'Inter', sans-serif; background: #f4f7f6; }
-.app-container { display: flex; }
-.dashboard { flex: 1; padding: 40px; }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: #7f8c8d; }
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #f4f7f6;
+}
 
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
-.card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: center; }
-.card.info { background: #e8f6f3; color: #16a085; text-align: left; font-size: 0.9rem; display: flex; align-items: center; }
-.value { font-size: 2rem; font-weight: bold; color: #2c3e50; }
+.app-container {
+  display: flex;
+}
 
-.refresh-btn { margin-left: auto; padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; }
-.refresh-btn:hover { background: #2980b9; }
+.dashboard {
+  flex: 1;
+  padding: 40px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #7f8c8d;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 24px;
+  align-items: start;
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.right-column {
+  min-width: 320px;
+  max-width: 420px;
+  height: calc(100vh - 160px);
+  overflow: auto;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  text-align: center;
+}
+
+.card.info {
+  background: #e8f6f3;
+  color: #16a085;
+  text-align: left;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.refresh-btn {
+  margin-left: auto;
+  padding: 10px 20px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.refresh-btn:hover {
+  background: #2980b9;
+}
 </style>
