@@ -84,7 +84,8 @@ Before starting, make sure you have:
 
 ## 2️⃣ Install Ampy
 
-Install ampy using pip with the command : "pip install adafruit-ampy"
+Install ampy using pip
+Open **PowerShell** and run: `pip install adafruit-ampy`
 
 ## 🔎 Find your ESP32 COM Port (Windows)
 
@@ -118,25 +119,14 @@ If there is **no error**, the driver is installed.
 
 Replace COM_PORT with your ESP32 COM port (e.g., COM3).
 Download the driver `sh1107.py` from the repository and go th its location on the command line.
-Upload the driver first (example: sh1107.py) with the command : "ampy --port COM_PORT put sh1107.py"
+Upload the driver first (example: sh1107.py) with the command : `ampy --port COM_PORT put sh1107.py`
  
 ### Upload the main program:
 
-Download the 'main.py' file and go to its location on the command line
-Put the main.py file in the esp32 with the command : "ampy --port COM_PORT put main.py"
+Download the 'main.py' file and open it with Visual studio code
+#### Configuration
 
-### Run the main program (optional, ESP32 usually runs main.py automatically):
-
-"ampy --port COM_PORT run main.py"
-
-### Check uploaded files:
-
-"ampy --port COM_PORT ls"
-
-
-## Configuration
-
-### Wi-Fi
+##### Wi-Fi
 
 Modify these lines in the code to match your network:
 
@@ -145,7 +135,7 @@ SSID = "YourWiFiName"
 PASSWORD = "YourWiFiPassword"
 ```
 
-### Backend IP
+##### Backend IP
 
 Modify `API_BASE` with your PC's local IP:
 
@@ -154,6 +144,21 @@ API_BASE = "http://192.168.1.42:8080"
 ```
 
 Find your IP with `ipconfig` (Windows) or `ifconfig`/`ip a` (Linux/macOS).
+
+#### Upload
+Go to the "main.py" file location on the command line
+Put the main.py file in the esp32 with the command : `ampy --port COM_PORT put main.py`
+
+### Run the main program (optional, ESP32 usually runs main.py automatically):
+
+`ampy --port COM_PORT run main.py`
+
+### Check uploaded files:
+
+`ampy --port COM_PORT ls`
+
+
+
 
 ---
 
