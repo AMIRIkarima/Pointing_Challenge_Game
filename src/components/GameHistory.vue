@@ -14,7 +14,6 @@
           <th>Date</th>
           <th>Difficulty</th>
           <th>Time (s)</th>
-          <th>Dist (px)</th>
           <th>Score</th>
         </tr>
       </thead>
@@ -27,7 +26,6 @@
             </span>
           </td>
           <td class="numeric">{{ formatTime(game.movementTime) }}</td>
-          <td class="numeric">{{ formatDistance(game) }}</td>
           <td class="score-cell">{{ formatScore(game.score) }}</td>
         </tr>
       </tbody>
@@ -54,32 +52,7 @@ const formatTime = (t) => {
   return `${n.toFixed(3)}s`;
 };
 
-const computeDistanceFromCoords = (g) => {
-  if (g == null) return null;
-  const sx = g.startX ?? g.sx ?? g.x1;
-  const sy = g.startY ?? g.sy ?? g.y1;
-  const ex = g.endX ?? g.ex ?? g.x2;
-  const ey = g.endY ?? g.ey ?? g.y2;
-  if (sx != null && sy != null && ex != null && ey != null) {
-    const dx = Number(ex) - Number(sx);
-    const dy = Number(ey) - Number(sy);
-    const d = Math.sqrt(dx * dx + dy * dy);
-    if (Number.isFinite(d)) return Math.round(d);
-  }
-  return null;
-};
-
-const formatDistance = (g) => {
-  if (!g) return '-';
-  const d = g.distance;
-  if (d !== undefined && d !== null && d !== '') {
-    const n = Number(d);
-    if (Number.isFinite(n)) return Math.round(n);
-  }
-  const computed = computeDistanceFromCoords(g);
-  if (computed != null) return computed;
-  return '-';
-};
+// distance removed — UI no longer displays a distance column
 
 const formatScore = (s) => {
   if (s === null || s === undefined || s === '') return '-';

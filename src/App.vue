@@ -38,17 +38,16 @@ const fetchAllPlayerData = async (playerId) => {
       };
 
       const movementTime = get(["movementTime", "movement_time", "time", "mt", "movementTimeMs", "ms"]);
-      const distance = get(["distance", "dist", "d", "distancePx", "distance_px"]);
       const score = get(["score", "xp", "points"]);
-      const difficulty = get(["difficulty", "diff", "level"]);
-      const creationDate = get(["creationDate", "createdAt", "timestamp", "timeStamp"]);
+      const difficulty = get(["difficulty", "diff", "level", "indexDifficulty", "index_difficulty"]);
+      const creationDate = get(["creationDate", "createdAt", "creation_date", "timestamp", "timeStamp"]);
       const id = get(["id", "_id", "gameId"]);
 
-      
-      const startX = get(["startX", "sx", "x1"]);
-      const startY = get(["startY", "sy", "y1"]);
-      const endX = get(["endX", "ex", "x2"]);
-      const endY = get(["endY", "ey", "y2"]);
+      // accept nested point objects like { startPoint: { x, y }, targetPoint: { x, y } }
+      const startX = get(["startX", "start_x", "sx", "x1"]) ?? (g.startPoint?.x ?? g.start_point?.x);
+      const startY = get(["startY", "start_y", "sy", "y1"]) ?? (g.startPoint?.y ?? g.start_point?.y);
+      const endX = get(["endX", "target_x", "ex", "x2"]) ?? (g.targetPoint?.x ?? g.target_point?.x ?? g.target?.x);
+      const endY = get(["endY", "target_y", "ey", "y2"]) ?? (g.targetPoint?.y ?? g.target_point?.y ?? g.target?.y);
 
       return {
         ...g,
@@ -56,7 +55,6 @@ const fetchAllPlayerData = async (playerId) => {
         creationDate,
         difficulty,
         movementTime,
-        distance,
         score,
         startX,
         startY,
